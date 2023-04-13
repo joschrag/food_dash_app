@@ -6,7 +6,7 @@ from dash import html
 app = dash.Dash(
     __name__,
     use_pages=True,
-    external_stylesheets=[dbc.themes.SLATE],
+    external_stylesheets=[dbc.themes.SLATE, "assets/style.css"],
 )
 nav_link_style = {
     "margin": "1em 1em",
