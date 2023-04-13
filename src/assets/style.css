@@ -1,0 +1,74 @@
+
+/*Global settings*/
+
+
+.dash-dropdown
+{
+    display: inline;
+    float: left;
+}
+
+.submit-btn
+{
+    max-width: 10em;
+    border: none;
+    background-color: #5bc0de;
+    padding: 0.5em 0.75em;
+    color: black;
+    border-radius: 0.5em;
+    transition: all .2s ease-in-out;
+    font-weight: bold;
+}
+
+.submit-btn:hover
+{
+    transform: scale(1.1);
+}
+
+/*Nav bar*/
+
+.nav-link:hover
+{
+    transform: scale(1.25);
+}
+
+/*Inventory site*/
+
+
+.inv_dd
+{
+    min-width: 10em;
+    max-width: 50em;
+    margin-top: 1em;
+}
+
+.inv_dd .Select-input
+{
+    max-width: 50em;
+}
+
+.inv_dd .Select-control, .inv_dd .Select-menu-outer
+{
+    background-color: #272b30;
+    color: white;
+}
+
+
+.row-item, .row-input
+{
+    float: left;
+    margin: 1em;
+}
+
+.row-input
+{
+    max-width: 10em;
+}
+
+#add_to_inventory
+{
+    width: 90em;
+    padding: 1em;
+    padding-left: 3em;
+    display:inline-block;
+}
