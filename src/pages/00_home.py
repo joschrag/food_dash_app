@@ -11,6 +11,4 @@ dash.register_page(
 )
 
 
-layout = dbc.Container(
-    [html.H1("Home")],
-)
+layout = dbc.Container([html.H1("Home")], fluid=True)
