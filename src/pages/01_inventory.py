@@ -1,6 +1,7 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import html, dcc
+import pandas as pd
 
 dash.register_page(
     __name__,
@@ -18,21 +19,71 @@ amount_txt = html.P("number of items:", className="row-item")
 cat_dd = dcc.Dropdown(
     placeholder="Choose a category",
     searchable=True,
-    className="row-item inv_dd",
+    className="row-item inv-dd",
 )
 amount_inp = dcc.Input(
     id="inv_amount", type="number", step=1, className="row-input"
 )
 name_inp = dcc.Input(id="inv_name", type="text", className="row-input")
 submit = dcc.ConfirmDialogProvider(
-    children=html.Button("Submit",className="row-item submit-btn"),
+    children=html.Button("Submit", className="row-item submit-btn"),
     id="inv_submit",
     message="Confirm your submission.",
 )
 
 add_item = html.Div(
-    children=[name_txt, name_inp, cat_dd, amount_txt, amount_inp, submit],
+    children=[
+        html.H4("Add an item:"),
+        name_txt,
+        name_inp,
+        cat_dd,
+        amount_txt,
+        amount_inp,
+        submit,
+    ],
     id="add_to_inventory",
 )
 
-layout = dbc.Container([headline, add_item], fluid=True)
+data = pd.DataFrame(
+    {
+        "id": [0, 1, 2, 3, 4],
+        "item_name": [
+            "Käse",
+            "Gurke",
+            "Tortellini",
+            "Brötchen",
+            "Tomaten (passiert)",
+        ],
+        "category": ["Kühlschrank", "Gemüse", "Nudeln", "Frühstück", "Nudeln"],
+        "amount": [2, 4, 0, 17, 33],
+    }
+)
+
+
+def display_items(df: pd.DataFrame) -> html.Table:
+    row_div = []
+    df = df.drop(columns=["id"])
+    col_group = html.Colgroup([html.Col() for _ in df.columns])
+    cols = ["Item", "Category", "Amount"]
+    table_head = html.Thead(html.Tr([html.Th(c) for c in cols]))
+    for _, content in df.iterrows():
+        item_name, cat, amount = content
+        item_txt = html.Td(item_name)
+        item_cat = html.Td(cat)
+        item_amount = html.Td(amount)
+        row_div.append(
+            html.Tr([item_txt, item_cat, item_amount], className="row-hover")
+        )
+    table_body = html.Tbody(row_div)
+    return html.Table([col_group, table_head, table_body], id="inv_item_list")
+
+
+item_overview = html.Div(
+    children=[
+        html.H4("Item Overview:"),
+        display_items(data),
+    ],
+    id="inv_item_overview",
+)
+
+layout = dbc.Container([headline, add_item, item_overview], fluid=True)
