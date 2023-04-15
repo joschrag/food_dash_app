@@ -35,19 +35,19 @@
 /*Inventory site*/
 
 
-.inv_dd
+.inv-dd
 {
     min-width: 10em;
     max-width: 50em;
     margin-top: 1em;
 }
 
-.inv_dd .Select-input
+.inv-dd .Select-input
 {
     max-width: 50em;
 }
 
-.inv_dd .Select-control, .inv_dd .Select-menu-outer
+.inv-dd .Select-control, .inv-dd .Select-menu-outer
 {
     background-color: #272b30;
     color: white;
@@ -65,10 +65,43 @@
     max-width: 10em;
 }
 
-#add_to_inventory
+#add_to_inventory, #inv_item_overview
 {
     width: 90em;
     padding: 1em;
     padding-left: 3em;
     display:inline-block;
+    margin: 1em;
+}
+
+#inv_item_list
+{
+    width: 75em;
+    margin-left: 10em;
+}
+
+#inv_item_list col
+{
+    width: 33%;
+    max-width: 33%;
+}
+
+#inv_item_list tr {
+    border-bottom: 1px solid #ddd;
+  }
+
+.row-hover:hover
+{
+    background-color: #5bc0de;
+    color: black;
+}
+
+#inv_item_list td, #inv_item_list th
+{
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding: 1em 0em;
+    border-radius: 1em;
 }
