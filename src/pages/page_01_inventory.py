@@ -1,7 +1,14 @@
+"""
+This module contains the layout for the inventory page.
+
+Author: Jonas Schrage
+Date: 15.04.2023
+
+"""
 import dash
 import dash_bootstrap_components as dbc
-from dash import html, dcc
 import pandas as pd
+from dash import dcc, html
 
 dash.register_page(
     __name__,
@@ -61,6 +68,14 @@ data = pd.DataFrame(
 
 
 def display_items(df: pd.DataFrame) -> html.Table:
+    """Create a html table to display the dataframe items.
+
+    Args:
+        df (pd.DataFrame): input data
+
+    Returns:
+        html.Table: data formatted into html table
+    """
     row_div = []
     df = df.drop(columns=["id"])
     col_group = html.Colgroup([html.Col() for _ in df.columns])

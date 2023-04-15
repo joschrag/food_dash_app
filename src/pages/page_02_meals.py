@@ -1,3 +1,10 @@
+"""
+This module contains the layout for the meals page.
+
+Author: Jonas Schrage
+Date: 15.04.2023
+
+"""
 import dash
 import dash_bootstrap_components as dbc
 from dash import html
