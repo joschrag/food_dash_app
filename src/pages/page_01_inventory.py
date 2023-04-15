@@ -67,21 +67,21 @@ data = pd.DataFrame(
 )
 
 
-def display_items(df: pd.DataFrame) -> html.Table:
+def display_items(input_df: pd.DataFrame) -> html.Table:
     """Create a html table to display the dataframe items.
 
     Args:
-        df (pd.DataFrame): input data
+        input_df (pd.DataFrame): input data
 
     Returns:
         html.Table: data formatted into html table
     """
     row_div = []
-    df = df.drop(columns=["id"])
-    col_group = html.Colgroup([html.Col() for _ in df.columns])
+    input_df = input_df.drop(columns=["id"])
+    col_group = html.Colgroup([html.Col() for _ in input_df.columns])
     cols = ["Item", "Category", "Amount"]
     table_head = html.Thead(html.Tr([html.Th(c) for c in cols]))
-    for _, content in df.iterrows():
+    for _, content in input_df.iterrows():
         item_name, cat, amount = content
         item_txt = html.Td(item_name)
         item_cat = html.Td(cat)
