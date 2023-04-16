@@ -23,13 +23,15 @@ headline = html.H1("Inventory")
 
 name_txt = html.P("Item name:", className="row-item")
 amount_txt = html.P("number of items:", className="row-item")
-cat_dd = dcc.Dropdown(
-    placeholder="Choose a category",
-    searchable=True,
-    className="row-item inv-dd",
-)
+dd_txt = html.P("Select or add tag", className="row-item")
+tag_txt = html.P("selected tags:", className="row-item")
+
 amount_inp = dcc.Input(
-    id="inv_amount", type="number", step=1, className="row-input"
+    id="inv_amount",
+    type="number",
+    step=1,
+    className="row-input",
+    placeholder=0,
 )
 name_inp = dcc.Input(id="inv_name", type="text", className="row-input")
 submit = dcc.ConfirmDialogProvider(
@@ -38,18 +40,70 @@ submit = dcc.ConfirmDialogProvider(
     message="Confirm your submission.",
 )
 
-add_item = html.Div(
-    children=[
-        html.H4("Add an item:"),
-        name_txt,
-        name_inp,
-        cat_dd,
-        amount_txt,
-        amount_inp,
-        submit,
+
+inv_tag_dd = dcc.Dropdown(
+    id="multi-dropdown",
+    options=[
+        {
+            "label": "Option 1",
+            "value": "option1",
+        },
+        {
+            "label": "Option 2",
+            "value": "option2",
+        },
+        {
+            "label": "Option 3",
+            "value": "option3",
+        },
     ],
-    id="add_to_inventory",
+    multi=True,
+    placeholder="Select options",
 )
+
+inv_tag_input = dcc.Input(
+    id="custom-tag-input",
+    placeholder="Enter a custom tag",
+    className="row-item",
+)
+
+inv_tag_submit_btn = html.Button(
+    "Add tag", id="add-tag-button", className="row-item submit-btn"
+)
+
+inv_input_form = dbc.Form(
+    [
+        dbc.Row(
+            [
+                dbc.Col(name_txt, width=2),
+                dbc.Col(dd_txt, width={"size": 2, "offset": 1}),
+                dbc.Col(
+                    tag_txt,
+                    width={"size": 2, "offset": 2},
+                ),
+                dbc.Col(
+                    amount_txt,
+                    width=2,
+                ),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(name_inp, width=2),
+                dbc.Col(inv_tag_dd, width=2),
+                dbc.Col(inv_tag_input, width=2),
+                dbc.Col(
+                    inv_tag_submit_btn,
+                    width=1,
+                ),
+                dbc.Col(html.Div(id="added-tags"), width=2),
+                dbc.Col(amount_inp, width=2),
+                dbc.Col(submit, width=1),
+            ]
+        ),
+    ]
+)
+
 
 data = pd.DataFrame(
     {
@@ -101,4 +155,4 @@ item_overview = html.Div(
     id="inv_item_overview",
 )
 
-layout = dbc.Container([headline, add_item, item_overview], fluid=True)
+layout = dbc.Container([headline, inv_input_form, item_overview], fluid=True)
