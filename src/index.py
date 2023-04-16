@@ -9,6 +9,8 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import html
 
+import app_callbacks  # noqa # pylint: disable=unused-import
+
 # Define the Dash app
 app = dash.Dash(
     __name__,
@@ -59,6 +61,3 @@ app.layout = dbc.Container(
     className="dbc",
     fluid=True,
 )
-
-if __name__ == "__main__":
-    app.run_server(debug=True, port=8050)
