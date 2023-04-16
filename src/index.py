@@ -9,6 +9,8 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import html
 
+import app_callbacks  # noqa # pylint: disable=unused-import
+
 # Define the Dash app
 app = dash.Dash(
     __name__,
