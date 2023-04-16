@@ -8,12 +8,10 @@ Date: 16.04.2023
 from typing import Dict, List, Tuple, Union
 
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
-
-from index import app
+from dash import Input, Output, State, callback
 
 
-@app.callback(
+@callback(
     Output("multi-dropdown", "value"),
     Output("multi-dropdown", "options"),
     Output("custom-tag-input", "value"),
@@ -41,6 +39,7 @@ def add_new_tag(
         A tuple containing the updated value list, the updated options list,
         and an empty string.
     """
+    value = value or []
     if n_clicks:
         added_tags = []
         if custom_tag:
@@ -51,7 +50,7 @@ def add_new_tag(
     return value, options, ""
 
 
-@app.callback(
+@callback(
     Output("added-tags", "children"),
     Input("multi-dropdown", "value"),
 )
@@ -66,8 +65,7 @@ def display_tags(selected_tags: List[str]) -> List[dbc.Badge] | None:
     """
     if selected_tags:
         badges = [
-            dbc.Badge(tag, pill=True, className="tag-badge")
-            for tag in selected_tags
+            dbc.Badge(tag, className="tag-badge") for tag in selected_tags
         ]
         return badges
     return None
