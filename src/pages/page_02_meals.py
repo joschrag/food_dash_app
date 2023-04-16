@@ -19,49 +19,73 @@ dash.register_page(
 
 headline = html.H1("Meals")
 
-meal_name_txt = html.P("meal name", className="grid grid-item")
-comp_name_txt = html.P("ingridient name", className="grid grid-item")
-amount_txt = html.P("ingridient amount", className="grid grid-item")
+meal_name_txt = dbc.Label(
+    html.P("meal name"), html_for="meal_inp", className="grid grid-item"
+)
+comp_name_txt = dbc.Label(
+    html.P("ingredient name"), html_for="comp_inp", className="grid grid-item"
+)
+amount_txt = dbc.Label(
+    html.P("ingredient amount"),
+    html_for="amount_inp",
+    className="grid grid-item",
+)
 meal_name_inp = dcc.Input(
-    type="text", placeholder="Enter a meal name...", className="grid grid-input"
+    type="text",
+    placeholder="Enter a meal name...",
+    className="grid grid-input",
+    id="meal_inp",
 )
 comp_name_inp = dcc.Input(
     type="text",
-    placeholder="Enter an ingridient name...",
+    placeholder="Enter an ingredient name...",
     className="grid grid-input",
+    id="comp_inp",
 )
 amount_inp = dcc.Input(
-    type="number", placeholder=0, className="grid grid-input"
+    type="number", placeholder=0, className="grid grid-input", id="amount_inp"
 )
 
 add_comp_btn = html.Button(
-    "Add ingridients", className="grid grid-btn submit-btn"
+    "Add ingredients", className="grid grid-btn submit-btn"
+)
+
+submit_meal_btn = html.Button(
+    "Submit meal recipe", className="grid grid-btn submit-btn"
 )
 
 
-add_meal_dbc = dbc.Container(
+add_meal_dbc = dbc.Form(
     [
         dbc.Row(
             [
-                dbc.Col(meal_name_txt, width=4),
-                dbc.Col(comp_name_txt, width=4),
-                dbc.Col(amount_txt, width=4),
+                dbc.Col(meal_name_txt, width=4, class_name="grid"),
+                dbc.Col(comp_name_txt, width=4, class_name="grid"),
+                dbc.Col(amount_txt, width=4, class_name="grid"),
             ]
         ),
         dbc.Row(
             [
-                dbc.Col(meal_name_inp, width=4),
-                dbc.Col(comp_name_inp, width=4),
-                dbc.Col(amount_inp, width=4),
+                dbc.Col(meal_name_inp, width=4, class_name="grid"),
+                dbc.Col(comp_name_inp, width=4, class_name="grid"),
+                dbc.Col(amount_inp, width=4, class_name="grid"),
             ]
         ),
         dbc.Row(
             [
-                dbc.Col(add_comp_btn, width={"size": 4, "offset": 8}),
+                dbc.Col(
+                    add_comp_btn,
+                    width={"size": 2, "offset": 8},
+                    class_name="grid",
+                ),
+                dbc.Col(
+                    submit_meal_btn,
+                    width={"size": 2},
+                    class_name="grid",
+                ),
             ]
         ),
     ],
     id="add_meal_div",
 )
-# TODO rewrite using forms
 layout = dbc.Container([headline, add_meal_dbc], fluid=True)
