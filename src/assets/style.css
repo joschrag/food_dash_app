@@ -6,6 +6,13 @@
 {
     display: inline;
     float: left;
+    width: 100%;
+}
+
+.dash-dropdown .Select-control, .dash-dropdown .Select-menu-outer
+{
+    background-color: #272b30;
+    color: white;
 }
 
 .submit-btn
@@ -45,12 +52,6 @@
 .inv-dd .Select-input
 {
     max-width: 50em;
-}
-
-.inv-dd .Select-control, .inv-dd .Select-menu-outer
-{
-    background-color: #272b30;
-    color: white;
 }
 
 
