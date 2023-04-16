@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple, Union
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 
-from src.index import app
+from index import app
 
 
 @app.callback(
