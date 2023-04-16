@@ -121,8 +121,15 @@
 
 .grid 
 {
-    text-align: center;
+    display: flex;
+    align-items: center;
     font-weight: bold;
+}
+
+.grid-item, .grid-item p
+{
+    width: 100%;
+    text-align: center;
 }
 
 .grid-input
@@ -133,6 +140,12 @@
     margin: 1em auto;
     padding: auto;
     font-weight: normal;
+}
+
+.grid-btn
+{
+
+    margin: auto;
 }
 
 
