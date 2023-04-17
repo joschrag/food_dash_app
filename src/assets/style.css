@@ -9,11 +9,17 @@
     --tag-orange: 249, 118, 11;
     --tag-indigo: 102, 16, 242;
     --tag-teal: 32, 201, 151;
+    --link-active-bg: 0, 123, 255;
+    --link-active: 255,255,255;
     --tag-alpha: 0.15;
+    --bg-light: #43474d;
   }
 
 /*Global settings*/
-
+a.active {
+    background-color: rgb(var(--link-active-bg)) !important;
+    color: rgb(var(--link-active)) !important;
+}
 
 .dash-dropdown
 {
@@ -76,6 +82,16 @@
 .row-input
 {
     max-width: 10em;
+}
+
+.inv-input
+{
+    width: 90%;
+    padding: 2em 1em;
+    margin: 1em;
+    margin-left: 5em;
+    border-radius: 1em;
+    background: var(--bg-light);
 }
 
 #add_to_inventory, #inv_item_overview
