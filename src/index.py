@@ -30,11 +30,21 @@ navbar = dbc.Navbar(
         # Use row and col to control vertical alignment of logo / brand
         dbc.Nav(
             [
-                dbc.NavLink("Home", href="/", style=nav_link_style),
                 dbc.NavLink(
-                    "Inventory", href="./inventory", style=nav_link_style
+                    "Home", href="/", active="exact", style=nav_link_style
                 ),
-                dbc.NavLink("Meals", href="./meals", style=nav_link_style),
+                dbc.NavLink(
+                    "Inventory",
+                    href="/inventory",
+                    active="exact",
+                    style=nav_link_style,
+                ),
+                dbc.NavLink(
+                    "Meals",
+                    href="/meals",
+                    active="exact",
+                    style=nav_link_style,
+                ),
             ],
             vertical=False,
             pills=True,
