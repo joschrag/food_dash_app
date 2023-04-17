@@ -33,7 +33,12 @@ amount_inp = dcc.Input(
     className="row-input",
     placeholder=0,
 )
-name_inp = dcc.Input(id="inv_name", type="text", className="row-input")
+name_inp = dcc.Input(
+    id="inv_name",
+    type="text",
+    className="row-input",
+    placeholder="Enter a name",
+)
 submit = dcc.ConfirmDialogProvider(
     children=html.Button("Submit", className="row-item submit-btn"),
     id="inv_submit",
@@ -58,7 +63,7 @@ inv_tag_dd = dcc.Dropdown(
         },
     ],
     multi=True,
-    placeholder="Select options",
+    placeholder="Select a tag",
 )
 
 inv_tag_input = dcc.Input(
@@ -101,7 +106,8 @@ inv_input_form = dbc.Form(
                 dbc.Col(submit, width=1),
             ]
         ),
-    ]
+    ],
+    className="inv-input",
 )
 
 
