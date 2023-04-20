@@ -16,9 +16,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-        pip install -r requirements.txt
+        python -m python -m pip install --upgrade pip
+        python -m pip install pylint
+        python -m pip install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
-        pydocstyle $(git ls-files '*.py')
+        python -m pydocstyle $(git ls-files '*.py')
