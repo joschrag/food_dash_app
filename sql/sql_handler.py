@@ -32,16 +32,9 @@ class SQLHandler:
 
         self.engine = sa.create_engine(f"sqlite:///{self.db_path}")
         self.meta.reflect(self.engine, views=True)
+        self.sqltable = None
         if self.table is not None:
             self.sqltable = self.get_table()
-
-    def establish_connection(self) -> None:
-        """Establish connection to a database."""
-        self.meta = sa.MetaData()
-
-        self.engine = sa.create_engine(f"sqlite:///{self.db_path}")
-        self.meta.reflect(self.engine, views=True)
-        self.sqltable = self.get_table()
 
     def get_table(self, table_name: str | None = None) -> sa.Table:
         """Get a table from the sqlite db.
@@ -60,8 +53,19 @@ class SQLHandler:
             return self.meta.tables[f"{table}"]
         raise KeyError(f"Table {table} does not exist.")
 
-    def read_table(self) -> pd.DataFrame:
-        """Read table or view from SQL server."""
+    def read_table(self, table_name: str | None = None) -> pd.DataFrame:
+        """Read table or view from SQL server.
+
+        Args:
+            table_name (str | None, optional): table name. Defaults to None.
+
+        Returns:
+            pd.DataFrame: Dataframe with data from sql table
+        """
+        if self.sqltable is None:
+            assert table_name
+            self.sqltable = self.get_table(table_name)
+        self.meta.reflect(self.engine, views=True)
         stmt = sa.select(self.sqltable)
         return_df = pd.read_sql(stmt, self.engine)
         return return_df
@@ -69,16 +73,21 @@ class SQLHandler:
     def write_table(
         self,
         upload_df: pd.DataFrame,
+        table_name: str | None = None,
         if_exists: Literal["replace", "append", "fail"] = "fail",
     ) -> None:
         """Write a table to an SQL database.
 
         Args:
             upload_df (pd.DataFrame): Dataframe to write to SQL database.
+            table_name (str | None): table name, defaults to None.
             if_exists (Literal["replace","append","fail"], optional): Behaviour
             if table exists already. Defaults to "fail".
         """
         assert if_exists in ["replace", "append", "fail"]
+        if self.sqltable is None:
+            assert table_name
+            self.sqltable = self.get_table(table_name)
         upload_df.reset_index(drop=True).to_sql(
             self.sqltable.name,
             self.engine,
