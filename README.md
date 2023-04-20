@@ -11,6 +11,6 @@
 ### TODO
 
     - [ ] Home layout
-    - [ ] Inventory layout
+    - [x] Inventory layout
     - [ ] Meals layout
     - [ ] pandas + sqlite backend
