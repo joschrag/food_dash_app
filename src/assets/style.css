@@ -1,0 +1,259 @@
+/*Color definitions*/
+:root {
+    --tag-red: 238, 95, 91;
+    --tag-cyan: 91, 192, 222;
+    --tag-blue: 0, 123, 255;
+    --tag-pink: 232, 62, 140;
+    --tag-yellow: 248, 244, 6;
+    --tag-green: 98, 196, 98;
+    --tag-orange: 249, 118, 11;
+    --tag-indigo: 102, 16, 242;
+    --tag-teal: 32, 201, 151;
+    --link-active-bg: 0, 123, 255;
+    --link-active: 255,255,255;
+    --tag-alpha: 0.15;
+    --bg-light: #43474d;
+  }
+
+/*Global settings*/
+a.active {
+    background-color: rgb(var(--link-active-bg)) !important;
+    color: rgb(var(--link-active)) !important;
+}
+
+.dash-dropdown
+{
+    display: inline;
+    float: left;
+    width: 100%;
+}
+
+.dash-dropdown .Select-control, .dash-dropdown .Select-menu-outer
+{
+    background-color: #272b30;
+    color: white;
+}
+
+.submit-btn
+{
+    max-width: 10em;
+    border: none;
+    background-color: #5bc0de;
+    padding: 0.5em 0.75em;
+    color: black;
+    border-radius: 0.5em;
+    transition: all .2s ease-in-out;
+    font-weight: bold;
+}
+
+.submit-btn:hover
+{
+    transform: scale(1.1);
+}
+
+/*Nav bar*/
+
+.nav-link:hover
+{
+    transform: scale(1.25);
+}
+
+/*Inventory site*/
+
+
+.inv-dd
+{
+    min-width: 10em;
+    max-width: 50em;
+    margin-top: 1em;
+}
+
+.inv-dd .Select-input
+{
+    max-width: 50em;
+}
+
+.row-item, .row-input, #multi-dropdown
+{
+    float: left;
+    margin: 1em;
+}
+
+.row-input
+{
+    max-width: 10em;
+}
+
+.inv-input
+{
+    width: 90%;
+    padding: 2em 1em;
+    margin: 1em;
+    margin-left: 5em;
+    border-radius: 1em;
+    background: var(--bg-light);
+}
+
+#add_to_inventory, #inv_item_overview
+{
+    width: 90em;
+    padding: 1em;
+    padding-left: 3em;
+    display:inline-block;
+    margin: 1em;
+}
+
+
+#inv_item_list
+{
+    width: 75em;
+    margin-left: 10em;
+}
+
+#inv_item_list col
+{
+    width: 33%;
+    max-width: 33%;
+}
+
+#inv_item_list tr> td:first-child
+{
+    border-bottom-left-radius: 2em;
+    border-top-left-radius: 2em;
+  }
+
+#inv_item_list tr> td:last-child
+{
+    border-bottom-right-radius: 2em;
+    border-top-right-radius: 2em;
+  }
+
+#inv_item_list tr:hover td
+{
+    background-color: #515151;
+    /*color: black;*/
+}
+
+#inv_item_list td, #inv_item_list th
+{
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+    font-size: 1.2em;
+    /*border-radius: 1em;*/
+}
+
+.tag-badge
+{
+    margin: 0.5em;
+    border: 1px solid;
+    font-size: 0.9em;
+}
+
+.tag-badge:hover
+{
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.tag-badge:nth-of-type(8n+1)
+{
+    color: rgba(var(--tag-cyan),1);
+    border-color: rgba(var(--tag-cyan),1);
+    background-color: rgba(var(--tag-cyan),var(--tag-alpha)) !important;
+}
+
+.tag-badge:nth-of-type(8n+2)
+{
+    color: rgba(var(--tag-teal),1);
+    border-color: rgba(var(--tag-teal),1);
+    background-color: rgba(var(--tag-teal),var(--tag-alpha)) !important;
+}
+
+.tag-badge:nth-of-type(8n+3)
+{
+    color: rgba(var(--tag-indigo),1);
+    border-color: rgba(var(--tag-indigo),1);
+    background-color: rgba(var(--tag-indigo),var(--tag-alpha)) !important;
+}
+
+.tag-badge:nth-of-type(8n+4)
+{
+    color: rgba(var(--tag-red),1);
+    border-color: rgba(var(--tag-red),1);
+    background-color: rgba(var(--tag-red),var(--tag-alpha)) !important;
+}
+
+.tag-badge:nth-of-type(8n+5)
+{
+    color: rgba(var(--tag-yellow),1);
+    border-color: rgba(var(--tag-yellow),1);
+    background-color: rgba(var(--tag-yellow),var(--tag-alpha)) !important;
+}
+
+.tag-badge:nth-of-type(8n+6)
+{
+    color: rgba(var(--tag-green),1);
+    border-color: rgba(var(--tag-green),1);
+    background-color: rgba(var(--tag-green),var(--tag-alpha)) !important;
+}
+
+.tag-badge:nth-of-type(8n+7)
+{
+    color: rgba(var(--tag-pink),1);
+    border-color: rgba(var(--tag-pink),1);
+    background-color: rgba(var(--tag-pink),var(--tag-alpha)) !important;
+}
+
+.tag-badge:nth-of-type(8n)
+{
+    color: rgba(var(--tag-orange),1);
+    border-color: rgba(var(--tag-orange),1);
+    background-color: rgba(var(--tag-orange),var(--tag-alpha)) !important;
+}
+
+
+
+/*Meals page*/
+
+#add_meal_div
+{
+    width: 90em;
+    padding: 2em 1em;
+    margin: 1em;
+    margin-left: 5em;
+    background-color: #43474d;
+    border-radius: 1em;
+}
+
+.grid 
+{
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+
+.grid-item, .grid-item p
+{
+    width: 100%;
+    text-align: center;
+}
+
+.grid-input
+{
+    min-width: 7em;
+    width: auto;
+    max-width: 15em;
+    margin: 1em auto;
+    padding: auto;
+    font-weight: normal;
+}
+
+.grid-btn
+{
+
+    margin: auto;
+}
+
+
+

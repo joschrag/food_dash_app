@@ -1,4 +1,4 @@
-name: Pylint
+name: Mypy
 
 on: [push]
 
@@ -21,4 +21,4 @@ jobs:
         python -m pip install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
-        python -m pylint $(git ls-files '*.py')
+        python -m mypy $(git ls-files '*.py')
