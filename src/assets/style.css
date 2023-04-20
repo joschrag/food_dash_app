@@ -116,14 +116,22 @@ a.active {
     max-width: 33%;
 }
 
-#inv_item_list tr {
-    border-bottom: 1px solid #ddd;
+#inv_item_list tr> td:first-child
+{
+    border-bottom-left-radius: 2em;
+    border-top-left-radius: 2em;
   }
 
-.row-hover:hover
+#inv_item_list tr> td:last-child
 {
-    background-color: #5bc0de;
-    color: black;
+    border-bottom-right-radius: 2em;
+    border-top-right-radius: 2em;
+  }
+
+#inv_item_list tr:hover td
+{
+    background-color: #515151;
+    /*color: black;*/
 }
 
 #inv_item_list td, #inv_item_list th
@@ -132,8 +140,7 @@ a.active {
     vertical-align: middle;
     font-weight: bold;
     font-size: 1.2em;
-    padding: 1em 0em;
-    border-radius: 1em;
+    /*border-radius: 1em;*/
 }
 
 .tag-badge

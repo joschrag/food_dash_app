@@ -48,20 +48,6 @@ submit = dcc.ConfirmDialogProvider(
 
 inv_tag_dd = dcc.Dropdown(
     id="multi-dropdown",
-    options=[
-        {
-            "label": "Option 1",
-            "value": "option1",
-        },
-        {
-            "label": "Option 2",
-            "value": "option2",
-        },
-        {
-            "label": "Option 3",
-            "value": "option3",
-        },
-    ],
     multi=True,
     placeholder="Select a tag",
 )
@@ -127,36 +113,10 @@ data = pd.DataFrame(
 )
 
 
-def display_items(input_df: pd.DataFrame) -> html.Table:
-    """Create a html table to display the dataframe items.
-
-    Args:
-        input_df (pd.DataFrame): input data
-
-    Returns:
-        html.Table: data formatted into html table
-    """
-    row_div = []
-    input_df = input_df.drop(columns=["id"])
-    col_group = html.Colgroup([html.Col() for _ in input_df.columns])
-    cols = ["Item", "Category", "Amount"]
-    table_head = html.Thead(html.Tr([html.Th(c) for c in cols]))
-    for _, content in input_df.iterrows():
-        item_name, cat, amount = content
-        item_txt = html.Td(item_name)
-        item_cat = html.Td(cat)
-        item_amount = html.Td(amount)
-        row_div.append(
-            html.Tr([item_txt, item_cat, item_amount], className="row-hover")
-        )
-    table_body = html.Tbody(row_div)
-    return html.Table([col_group, table_head, table_body], id="inv_item_list")
-
-
 item_overview = html.Div(
     children=[
         html.H4("Item Overview:"),
-        display_items(data),
+        dbc.Row(dbc.Col(id="inv_list")),
     ],
     id="inv_item_overview",
 )
