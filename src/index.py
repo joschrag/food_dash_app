@@ -7,10 +7,13 @@ Date: 15.04.2023
 """
 import dash
 import dash_bootstrap_components as dbc
-from dash import html
+from dash import dcc, html
 
-import app_callbacks  # noqa # pylint: disable=unused-import
+import src.app_callbacks  # noqa # pylint: disable=unused-import
 
+SECOND = 1000
+MINUTE = 60 * SECOND
+MINUTES10 = 10 * MINUTE
 # Define the Dash app
 app = dash.Dash(
     __name__,
@@ -55,8 +58,8 @@ navbar = dbc.Navbar(
     dark=True,
     sticky="top",
     style={
-        "margin-left": "10em",
-        "margin-bottom": "3em",
+        "padding-left": "10em",
+        "padding-bottom": "3em",
         "border": "none",
         "width": "auto",
     },
@@ -64,9 +67,14 @@ navbar = dbc.Navbar(
 
 # Set the app layout
 app.layout = dbc.Container(
-    [
+    children=[
         navbar,
         dbc.Row(html.Div(dash.page_container)),
+        dcc.Store(id="meal_data", storage_type="session"),
+        dcc.Store(id="ingredient_data", storage_type="session"),
+        dcc.Store(id="tag_data", storage_type="session"),
+        dcc.Store(id="tag_ingredient_data", storage_type="session"),
+        dcc.Interval(id="10_min", interval=MINUTES10),
     ],
     className="dbc",
     fluid=True,
