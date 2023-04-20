@@ -21,7 +21,7 @@ from sqlalchemy import (
     Table,
 )
 
-from src.sql_handler import SQLHandler
+from sql.sql_handler import SQLHandler
 
 
 def create_database(db_location: str | Path) -> None:
@@ -45,25 +45,15 @@ def create_database(db_location: str | Path) -> None:
     _ = Table(
         "tags",
         metadata,
-        Column("id", Integer, primary_key=True),
+        Column("id", Integer, primary_key=True, autoincrement=True),
         Column("tag_name", String),
-    )
-
-    # Define the items table
-    _ = Table(
-        "items",
-        metadata,
-        Column("id", Integer, primary_key=True),
-        Column("name", String),
-        Column("amount", Float),
-        Column("tag_name", String, ForeignKey("tags.tag_name")),
     )
 
     # Define the meals table
     _ = Table(
         "meals",
         metadata,
-        Column("id", Integer, primary_key=True),
+        Column("id", Integer, primary_key=True, autoincrement=True),
         Column("name", String),
     )
 
@@ -71,11 +61,24 @@ def create_database(db_location: str | Path) -> None:
     _ = Table(
         "ingredients",
         metadata,
-        Column("id", Integer, primary_key=True),
-        Column("name", String),
-        Column("quantity", Integer),
+        Column("id", Integer, primary_key=True, autoincrement=True),
+        Column("ingredient_name", String),
+        Column("inventory_amount", Float),
+        Column("recipe_amount", Float),
         Column("meal_id", Integer, ForeignKey("meals.id")),
-        Column("tag_name", String, ForeignKey("tags.tag_name")),
+        Column("tag_id", Integer, ForeignKey("tags.id")),
+    )
+
+    _ = Table(
+        "ingredient_tags",
+        metadata,
+        Column(
+            "ingredient_id",
+            Integer,
+            ForeignKey("ingredients.id"),
+            primary_key=True,
+        ),
+        Column("tag_id", Integer, ForeignKey("tags.id"), primary_key=True),
     )
 
     # Create the database
@@ -95,68 +98,151 @@ def load_data(db_location: str | Path, data: Dict[str, DataFrame]) -> None:
 
     engine = sql_handler.engine
 
-    with engine.connect() as conn, conn.begin():
-        for table_name, iter_df in data.items():
+    for table_name, iter_df in data.items():
+        with engine.connect() as conn, conn.begin():
+            print(table_name, iter_df, sep="\n")
+            # iter_df.to_excel(f"{table_name}.xlsx")
+            ingredients_table = None
             if table_name == "tags":
-                iter_df = data["tags"]
-                if not "id" in iter_df.columns:
-                    iter_df = iter_df.reset_index()
-                    iter_df = iter_df.rename(columns={"index": "id"})
                 iter_df.to_sql(
-                    table_name, conn, if_exists="replace", index=False
+                    table_name, conn, if_exists="append", index=False
                 )
             else:
-                tag_list = []
+                if table_name != "ingredients":
+                    ingredients_table = sql_handler.get_table("ingredients")
                 tag_table = sql_handler.get_table("tags")
+                # print(iter_df)
                 # Replace tag_name column with tag_id by querying the tags table
                 if "tag_name" in iter_df.columns:
-                    for row in iter_df.tag_name:
-                        stmt = sa.select(tag_table.c.id).where(
-                            tag_table.c.tag_name == row
-                        )
-                        tag_name_row = conn.execute(stmt).first()
-                        assert tag_name_row
-                        tag_name = tag_name_row[0]
-                        tag_list.append(tag_name)
-                    iter_df["tag_id"] = pd.Series(tag_list)
-                    iter_df.drop("tag_name", axis=1, inplace=True)
-            if not "id" in iter_df.columns:
-                iter_df = iter_df.reset_index()
-                iter_df = iter_df.rename(columns={"index": "id"})
-            iter_df.to_sql(table_name, conn, if_exists="replace", index=False)
+                    iter_df = tag_name_to_id(iter_df, tag_table, conn)
+                print(iter_df)
+                if (
+                    "ingredient_name" in iter_df.columns
+                    and table_name != "ingredients"
+                ):
+                    iter_df = ingredient_name_to_id(
+                        iter_df, ingredients_table, conn
+                    )
+            iter_df.to_sql(table_name, conn, if_exists="append", index=False)
 
 
-if __name__ == "__main__":
+def ingredient_name_to_id(
+    data: pd.DataFrame, table: sa.Table | None, conn: sa.Connection
+) -> pd.DataFrame:
+    """Replace the names given by ids present in the sql table.
+
+    Args:
+        data (pd.DataFrame): dataframe with item names
+        table (sa.Table | None): table to get the ids from
+        conn (sa.Connection): db connection
+
+    Returns:
+        pd.DataFrame: dataframe with item ids
+    """
+    ingredient_list = []
+    assert table is not None
+    for row in data.ingredient_name:
+        stmt = sa.select(table.c.id).where(table.c.ingredient_name == row)
+        ingredient_name_row = conn.execute(stmt).first()
+        assert ingredient_name_row
+        ingredient_name = ingredient_name_row[0]
+        ingredient_list.append(ingredient_name)
+    data["ingredient_id"] = pd.Series(ingredient_list)
+    data = data.drop("ingredient_name", axis=1)
+    return data
+
+
+def tag_name_to_id(
+    data: pd.DataFrame, table: sa.Table | None, conn: sa.Connection
+) -> pd.DataFrame:
+    """Replace the names given by ids present in the sql table.
+
+    Args:
+        data (pd.DataFrame): dataframe with item names
+        table (sa.Table | None): table to get the ids from
+        conn (sa.Connection): db connection
+
+    Returns:
+        pd.DataFrame: dataframe with item ids
+    """
+    print(conn, type(conn))
+    tag_list = []
+    assert table is not None
+    for row in data.tag_name:
+        stmt = sa.select(table.c.id).where(table.c.tag_name == row)
+        tag_name_row = conn.execute(stmt).first()
+        assert tag_name_row
+        tag_name = tag_name_row[0]
+        tag_list.append(tag_name)
+    data["tag_id"] = pd.Series(tag_list)
+    data = data.drop("tag_name", axis=1)
+    return data
+
+
+def main() -> None:
+    """Initialize the database."""
     db_path = Path.cwd() / "sql" / "example.db"
 
-    tags_df = pd.DataFrame({"tag_name": ["fruit", "vegetable", "meat"]})
-
-    items_df = pd.DataFrame(
-        {
-            "name": ["apple", "banana", "carrot", "beef", "chicken"],
-            "amount": [1.5, 2, 0.5, 3.5, 2.5],
-            "tag_name": ["fruit", "fruit", "vegetable", "meat", "meat"],
-        }
+    tags_df = pd.DataFrame(
+        {"tag_name": ["Obst", "Gemüse", "Ersatzprodukt", "Kühlschrank"]}
     )
 
     meals_df = pd.DataFrame(
-        {"name": ["fruit salad", "vegetable soup", "beef stew"]}
+        {"name": ["Obstsalat", "Gemüsesuppe", "Hackfleischeintopf"]}
     )
 
     ingredients_df = pd.DataFrame(
         {
-            "name": ["apple", "banana", "carrot", "beef", "chicken"],
-            "quantity": [2, 1, 2, 1, 2],
+            "ingredient_name": [
+                "Apfel",
+                "Banane",
+                "Karotte",
+                "Hackfleisch",
+                "Hähnchen",
+            ],
+            "inventory_amount": [2, 1, 2, 1, 2],
+            "recipe_amount": [1.5, 2, 0.5, 3.5, 2.5],
             "meal_id": [1, 2, 3, 3, 3],
-            "tag_name": ["fruit", "fruit", "vegetable", "meat", "meat"],
+            "tag_name": [
+                "Obst",
+                "Obst",
+                "Gemüse",
+                "Ersatzprodukt",
+                "Ersatzprodukt",
+            ],
+        }
+    )
+
+    ingredient_tag_df = pd.DataFrame(
+        {
+            "tag_name": [
+                "Obst",
+                "Obst",
+                "Gemüse",
+                "Kühlschrank",
+                "Ersatzprodukt",
+                "Kühlschrank",
+                "Ersatzprodukt",
+                "Kühlschrank",
+            ],
+            "ingredient_name": [
+                "Apfel",
+                "Banane",
+                "Karotte",
+                "Karotte",
+                "Hackfleisch",
+                "Hackfleisch",
+                "Hähnchen",
+                "Hähnchen",
+            ],
         }
     )
 
     all_data = {
         "tags": tags_df,
-        "items": items_df,
         "meals": meals_df,
         "ingredients": ingredients_df,
+        "ingredient_tags": ingredient_tag_df,
     }
 
     create_database(db_path)
