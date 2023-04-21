@@ -64,9 +64,6 @@ def create_database(db_location: str | Path) -> None:
         Column("id", Integer, primary_key=True, autoincrement=True),
         Column("ingredient_name", String),
         Column("inventory_amount", Float),
-        Column("recipe_amount", Float),
-        Column("meal_id", Integer, ForeignKey("meals.id")),
-        Column("tag_id", Integer, ForeignKey("tags.id")),
     )
 
     _ = Table(
@@ -79,6 +76,19 @@ def create_database(db_location: str | Path) -> None:
             primary_key=True,
         ),
         Column("tag_id", Integer, ForeignKey("tags.id"), primary_key=True),
+    )
+
+    _ = Table(
+        "ingredient_meals",
+        metadata,
+        Column("meal_id", Integer, ForeignKey("meals.id"), primary_key=True),
+        Column(
+            "ingredient_id",
+            Integer,
+            ForeignKey("ingredients.id"),
+            primary_key=True,
+        ),
+        Column("recipe_amount", Float),
     )
 
     # Create the database
@@ -188,7 +198,7 @@ def main() -> None:
     )
 
     meals_df = pd.DataFrame(
-        {"name": ["Obstsalat", "Gemüsesuppe", "Hackfleischeintopf"]}
+        {"name": ["Obstsalat", "Gemüsesuppe", "Bauerntopf"]}
     )
 
     ingredients_df = pd.DataFrame(
@@ -198,18 +208,9 @@ def main() -> None:
                 "Banane",
                 "Karotte",
                 "Hackfleisch",
-                "Hähnchen",
+                "Paprika",
             ],
             "inventory_amount": [2, 1, 2, 1, 2],
-            "recipe_amount": [1.5, 2, 0.5, 3.5, 2.5],
-            "meal_id": [1, 2, 3, 3, 3],
-            "tag_name": [
-                "Obst",
-                "Obst",
-                "Gemüse",
-                "Ersatzprodukt",
-                "Ersatzprodukt",
-            ],
         }
     )
 
@@ -222,7 +223,7 @@ def main() -> None:
                 "Kühlschrank",
                 "Ersatzprodukt",
                 "Kühlschrank",
-                "Ersatzprodukt",
+                "Gemüse",
                 "Kühlschrank",
             ],
             "ingredient_name": [
@@ -232,9 +233,17 @@ def main() -> None:
                 "Karotte",
                 "Hackfleisch",
                 "Hackfleisch",
-                "Hähnchen",
-                "Hähnchen",
+                "Paprika",
+                "Paprika",
             ],
+        }
+    )
+
+    meal_ingredient_df = pd.DataFrame(
+        {
+            "meal_id": [1, 1, 2, 3, 3, 3],
+            "ingredient_id": [1, 2, 3, 3, 4, 5],
+            "recipe_amount": [1.5, 2, 0.5, 1, 3.5, 2.5],
         }
     )
 
@@ -243,6 +252,7 @@ def main() -> None:
         "meals": meals_df,
         "ingredients": ingredients_df,
         "ingredient_tags": ingredient_tag_df,
+        "ingredient_meals": meal_ingredient_df,
     }
 
     create_database(db_path)
