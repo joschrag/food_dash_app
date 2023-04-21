@@ -38,11 +38,10 @@ name_inp = dcc.Input(
     type="text",
     className="row-input",
     placeholder="Enter a name",
+    list="list_inv_name",
 )
-submit = dcc.ConfirmDialogProvider(
-    children=html.Button("Submit", className="row-item submit-btn"),
-    id="inv_submit",
-    message="Confirm your submission.",
+submit = html.Button(
+    "Submit", className="row-item submit-btn", id="inv_submit_btn"
 )
 
 
@@ -64,6 +63,10 @@ inv_tag_submit_btn = html.Button(
 
 inv_input_form = dbc.Form(
     [
+        html.Datalist(
+            id="list_inv_name",
+            children=[],
+        ),
         dbc.Row(
             [
                 dbc.Col(name_txt, width=2),
