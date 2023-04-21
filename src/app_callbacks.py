@@ -13,6 +13,7 @@ import pandas as pd
 from dash import Input, Output, State, callback, ctx, html  # , dcc
 
 from sql.sql_handler import SQLHandler
+from src.scripts.load_sample_data import load_data
 
 db_path = Path.cwd() / "sql" / "example.db"
 
@@ -32,8 +33,12 @@ def read_data(table_name: str) -> List:
     return result.to_dict("records")
 
 
-@callback(Output("tag_data", "data"), Input("10_min", "n_intervals"))
-def load_tags(_: int) -> List:
+@callback(
+    Output("tag_data", "data"),
+    Input("10_min", "n_intervals"),
+    Input("reload_data_btn", "n_clicks"),
+)
+def load_tags(_: int, __: int) -> List:
     """Load tags data from database and return as a list.
 
     Args:
@@ -45,8 +50,12 @@ def load_tags(_: int) -> List:
     return read_data("tags")
 
 
-@callback(Output("meal_data", "data"), Input("10_min", "n_intervals"))
-def load_meals(_: int) -> List:
+@callback(
+    Output("meal_data", "data"),
+    Input("10_min", "n_intervals"),
+    Input("reload_data_btn", "n_clicks"),
+)
+def load_meals(_: int, __: int) -> List:
     """Load meals data from database and return as a list.
 
     Args:
@@ -58,8 +67,12 @@ def load_meals(_: int) -> List:
     return read_data("meals")
 
 
-@callback(Output("ingredient_data", "data"), Input("10_min", "n_intervals"))
-def load_ingredients(_: int) -> List:
+@callback(
+    Output("ingredient_data", "data"),
+    Input("10_min", "n_intervals"),
+    Input("reload_data_btn", "n_clicks"),
+)
+def load_ingredients(_: int, __: int) -> List:
     """Load ingredients data from database and return as a list.
 
     Args:
@@ -71,8 +84,12 @@ def load_ingredients(_: int) -> List:
     return read_data("ingredients")
 
 
-@callback(Output("tag_ingredient_data", "data"), Input("10_min", "n_intervals"))
-def load_ingredient_tags(_: int) -> List:
+@callback(
+    Output("tag_ingredient_data", "data"),
+    Input("10_min", "n_intervals"),
+    Input("reload_data_btn", "n_clicks"),
+)
+def load_ingredient_tags(_: int, __: int) -> List:
     """Load ingredients data from database and return as a list.
 
     Args:
@@ -82,6 +99,36 @@ def load_ingredient_tags(_: int) -> List:
         A list of ingredient data from the database.
     """
     return read_data("ingredient_tags")
+
+
+@callback(
+    Output("meal_ingredient_data", "data"),
+    Input("10_min", "n_intervals"),
+    Input("reload_data_btn", "n_clicks"),
+)
+def load_ingredient_meals(_: int, __: int) -> List:
+    """Load ingredients data from database and return as a list.
+
+    Args:
+        _ (int): Unused input, required for Dash callback.
+
+    Returns:
+        A list of ingredient data from the database.
+    """
+    return read_data("ingredient_meals")
+
+
+# @callback(
+#     Output("reload_data_btn", "active"),
+#     Input("meal_ingredient_data", "data"),
+#     Input("ingredient_data", "data"),
+#     Input("tag_ingredient_data", "data"),
+#     Input("meal_data", "data"),
+#     Input("tag_data", "data"),
+# )
+# def reset_button(*args):
+#     _ = args
+#     return False
 
 
 @callback(
@@ -114,12 +161,9 @@ def add_new_tag(
         A tuple containing the updated value list, the updated options list,
         and an empty string.
     """
+    options = options or []
     value = value or []
-    if ctx.triggered_id == "tag_data":
-        options_list = pd.DataFrame(data).tag_name.unique()
-        options = [{"label": item, "value": item} for item in options_list]
-        return value, options, ""
-    if n_clicks:
+    if ctx.triggered_id == "add-tag-button" and n_clicks:
         added_tags = []
         if custom_tag:
             conn = SQLHandler(db_path, "tags")
@@ -129,7 +173,10 @@ def add_new_tag(
             data_df = pd.DataFrame({"tag_name": [custom_tag]})
             conn.write_table(data_df, if_exists="append")
         return value, options, ""
-    return [], [], ""
+
+    options_list = pd.DataFrame(data).tag_name.unique()
+    options = [{"label": item, "value": item} for item in options_list]
+    return value, options, ""
 
 
 @callback(
@@ -164,7 +211,7 @@ def display_items(input_df: pd.DataFrame) -> html.Table:
     """
     row_div = []
     col_group = html.Colgroup([html.Col() for _ in input_df.columns])
-    cols = ["Item", "Category", "Amount"]
+    cols = ["Item", "Tags", "Amount"]
     table_head = html.Thead(html.Tr([html.Th(c) for c in cols]))
     iter_df = input_df.loc[
         :, ["id", "ingredient_name", "inventory_amount"]
@@ -218,3 +265,117 @@ def display_ingredient_inventory(
     )
     table = display_items(temp_df)
     return [table]
+
+
+@callback(Output("list_inv_name", "children"), Input("ingredient_data", "data"))
+def update_ing_autocomplete(data: List) -> List:
+    """Update the autocomlete suggestions.
+
+    Args:
+        data (List): data from store object
+
+    Returns:
+        List: list of html option tags
+    """
+    data_list = pd.DataFrame(data).ingredient_name.unique()
+    return [html.Option(value=word) for word in data_list]
+
+
+@callback(
+    Output("reload_data_btn", "n_clicks"),
+    inputs=dict(
+        n_clicks=Input("inv_submit_btn", "n_clicks"),
+        name=State("inv_name", "value"),
+        amount=State("inv_amount", "value"),
+        tags=State("added-tags", "children"),
+        states=[
+            State("tag_data", "data"),
+            State("ingredient_data", "data"),
+            State("tag_ingredient_data", "data"),
+        ],
+        num_clicks=State("reload_data_btn", "n_clicks"),
+    ),
+    prevent_initial_call=True,
+)
+def write_inventory_data(
+    n_clicks: int,
+    name: str,
+    amount: float,
+    tags: List,
+    states: List,
+    num_clicks: int,
+) -> int:
+    """Submit new inventory item to database and storage.
+
+    Args:
+        n_clicks (int): number of button clicks
+        name (str): value of name input
+        amount (float): value of amount input
+        tags (List): selected tags
+
+    Returns:
+        Tuple[List, List, List]: Tuple of the updated store lists
+    """
+    num_clicks = num_clicks or 0
+    if n_clicks and all(states):
+        data: dict = {}
+        tag_data, ingredient_data, tag_ingredient_data = states
+        stored_tag_df = pd.DataFrame(tag_data)
+        stored_ingredient_df = pd.DataFrame(ingredient_data)
+        stored_tag_ingredient_df = pd.DataFrame(tag_ingredient_data)
+        selected_tags = [tag.get("props").get("children") for tag in tags]
+        new_tags = [
+            tag
+            for tag in selected_tags
+            if tag not in stored_tag_df.tag_name.to_list()
+        ]
+        if new_tags:
+            tags_df = pd.DataFrame({"tag_name": new_tags})
+            data["tags"] = tags_df
+        pd.DataFrame(ingredient_data).info()
+        pd.DataFrame(tag_ingredient_data).info()
+        is_new_ingredient = (
+            name not in stored_ingredient_df.ingredient_name.to_list()
+        )
+        if is_new_ingredient:
+            ingredients_df = pd.DataFrame(
+                {
+                    "ingredient_name": [name],
+                    "inventory_amount": [amount],
+                }
+            )
+            data["ingredients"] = ingredients_df
+            name_id = stored_ingredient_df.id.max() + 1
+        else:
+            name_id_arr = stored_ingredient_df.query(
+                "ingredient_name==@name"
+            ).id.values
+            assert len(name_id_arr) == 1
+            name_id = name_id_arr[0]
+        # filter old tags from the tag list
+        print(stored_ingredient_df)
+        print(f"{name_id=}\n")
+        old_tag_list = stored_tag_ingredient_df.query(
+            "ingredient_id==@name_id"
+        ).tag_id.values
+        print(selected_tags)
+        selected_tag_list = stored_tag_df.query(
+            "tag_name in @selected_tags"
+        ).id.values
+        print(old_tag_list)
+        print(selected_tag_list)
+        print("*" * 20)
+        print(stored_tag_ingredient_df)
+        print(stored_tag_df)
+        new_ingredient_tags = stored_tag_ingredient_df.ingredient_id.to_list()
+        ingredient_tag_df = pd.DataFrame(
+            {
+                "tag_name": selected_tags,
+                "ingredient_name": [name] * len(selected_tags),
+            }
+        )
+
+        data["ingredient_tags"] = ingredient_tag_df
+        # if data:
+        #    load_data(db_path, data)
+    return num_clicks + 1
