@@ -13,9 +13,33 @@
     --link-active: 255,255,255;
     --tag-alpha: 0.15;
     --bg-light: #43474d;
+    --btn-bg: 91,192,222;
   }
 
 /*Global settings*/
+button.btn {
+    margin: 1em 1em;
+    text-align: center;
+    background: rgb(var(--btn-bg));
+    padding: 0.5em 2em;
+    color: black;
+    transition: all 0.3s ease-in-out;
+    z-index : 1;
+}
+
+button.btn:hover {
+    transform: scale(1.2);
+    color: black !important;
+    background: rgb(var(--btn-bg)) !important;
+}
+
+button.btn:active, .submit-btn:active{
+    background: rgb(var(--link-active-bg)) !important;
+    transition: none !important;
+    transition: transform 0.2s ease-in-out !important;
+    transform: scale(1.1) !important;
+}
+
 a.active {
     background-color: rgb(var(--link-active-bg)) !important;
     color: rgb(var(--link-active)) !important;
@@ -48,7 +72,7 @@ a.active {
 
 .submit-btn:hover
 {
-    transform: scale(1.1);
+    transform: scale(1.2);
 }
 
 /*Nav bar*/
