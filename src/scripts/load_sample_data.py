@@ -6,11 +6,10 @@ Date: 17.04.2023
 
 """
 from pathlib import Path
-from typing import Dict
+from typing import Literal
 
 import pandas as pd
 import sqlalchemy as sa
-from pandas.core.frame import DataFrame
 from sqlalchemy import (
     Column,
     Float,
@@ -95,7 +94,10 @@ def create_database(db_location: str | Path) -> None:
     metadata.create_all(engine)
 
 
-def load_data(db_location: str | Path, data: Dict[str, DataFrame]) -> None:
+def load_data(
+    db_location: str | Path,
+    data: list[tuple[str, pd.DataFrame, Literal["append", "replace", "fail"]]],
+) -> None:
     """
     Load sample data into the SQLite database.
 
@@ -108,14 +110,14 @@ def load_data(db_location: str | Path, data: Dict[str, DataFrame]) -> None:
 
     engine = sql_handler.engine
 
-    for table_name, iter_df in data.items():
+    for table_name, iter_df, load_mode in data:
         with engine.connect() as conn, conn.begin():
             print(table_name, iter_df, sep="\n")
             # iter_df.to_excel(f"{table_name}.xlsx")
             ingredients_table = None
             if table_name == "tags":
                 iter_df.to_sql(
-                    table_name, conn, if_exists="append", index=False
+                    table_name, conn, if_exists=load_mode, index=False
                 )
             else:
                 if table_name != "ingredients":
@@ -133,7 +135,7 @@ def load_data(db_location: str | Path, data: Dict[str, DataFrame]) -> None:
                     iter_df = ingredient_name_to_id(
                         iter_df, ingredients_table, conn
                     )
-            iter_df.to_sql(table_name, conn, if_exists="append", index=False)
+            iter_df.to_sql(table_name, conn, if_exists=load_mode, index=False)
 
 
 def ingredient_name_to_id(
@@ -246,14 +248,14 @@ def main() -> None:
             "recipe_amount": [1.5, 2, 0.5, 1, 3.5, 2.5],
         }
     )
-
-    all_data = {
-        "tags": tags_df,
-        "meals": meals_df,
-        "ingredients": ingredients_df,
-        "ingredient_tags": ingredient_tag_df,
-        "ingredient_meals": meal_ingredient_df,
-    }
+    mode: Literal["replace", "append", "fail"] = "replace"
+    all_data = [
+        ("tags", tags_df, mode),
+        ("meals", meals_df, mode),
+        ("ingredients", ingredients_df, mode),
+        ("ingredient_tags", ingredient_tag_df, mode),
+        ("ingredient_meals", meal_ingredient_df, mode),
+    ]
 
     create_database(db_path)
     load_data(db_path, all_data)
