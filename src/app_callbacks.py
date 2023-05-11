@@ -6,15 +6,14 @@ Date: 16.04.2023
 
 """
 from pathlib import Path
-from typing import Tuple
+from typing import Literal, Tuple
 
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import Input, Output, State, callback, ctx, html  # , dcc
 
 from sql.sql_handler import SQLHandler
-
-# from src.scripts.load_sample_data import load_data
+from src.scripts.load_sample_data import load_data
 
 db_path = Path.cwd() / "sql" / "example.db"
 
@@ -348,7 +347,9 @@ def write_inventory_data(
     num_clicks = num_clicks or 0
     amount = amount or 0
     if n_clicks and all(states):
-        data: dict = {}
+        data: list[
+            tuple[str, pd.DataFrame, Literal["append", "replace", "fail"]]
+        ] = []
         tag_data, ingredient_data, tag_ingredient_data = states
         mem_tag_df = pd.DataFrame(tag_data)
         mem_ing_df = pd.DataFrame(ingredient_data)
@@ -361,7 +362,7 @@ def write_inventory_data(
         ]
         if new_tags:
             tags_df = pd.DataFrame({"tag_name": new_tags})
-            data["tags"] = tags_df
+            data.append(("tags", tags_df, "append"))
         is_new_ingredient = name not in mem_ing_df.ingredient_name.to_list()
         if is_new_ingredient:
             ingredients_df = pd.DataFrame(
@@ -370,7 +371,7 @@ def write_inventory_data(
                     "inventory_amount": [amount],
                 }
             )
-            data["ingredients"] = ingredients_df
+            data.append(("ingredients", ingredients_df, "append"))
             name_id = mem_ing_df.id.max() + 1
         else:
             name_id_arr = mem_ing_df.query("ingredient_name==@name").id.values
@@ -386,7 +387,7 @@ def write_inventory_data(
             mem_ing_df.loc[mem_ing_df.id == name_id, "inventory_amount"] = (
                 old_amount + amount
             )
-            sql_handler.write_table(mem_ing_df, if_exists="replace")
+            data.append(("ingredients", mem_ing_df, "replace"))
 
         # filter old tags from the tag list
         old_tag_list = mem_tag_ing_df.query(
@@ -403,8 +404,7 @@ def write_inventory_data(
             }
         )
 
-        data["ingredient_tags"] = ingredient_tag_df
-        print(data)
-        # if data:
-        #    load_data(db_path, data)
+        data.append(("ingredient_tags", ingredient_tag_df, "append"))
+        if data:
+            load_data(db_path, data)
     return num_clicks + 1
