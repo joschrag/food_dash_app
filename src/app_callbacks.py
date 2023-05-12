@@ -10,7 +10,7 @@ from typing import Literal, Tuple
 
 import dash_bootstrap_components as dbc
 import pandas as pd
-from dash import Input, Output, State, callback, ctx, html  # , dcc
+from dash import Input, Output, State, callback, ctx, dcc, html
 
 from sql.sql_handler import SQLHandler
 from src.scripts.load_sample_data import load_data
@@ -297,7 +297,7 @@ def display_ingredient_inventory(
 
 @callback(Output("list_inv_name", "children"), Input("ingredient_data", "data"))
 def update_ing_autocomplete(data: list) -> list:
-    """Update the autocomlete suggestions.
+    """Update the autocomplete suggestions.
 
     Args:
         data (list): data from store object
@@ -306,6 +306,20 @@ def update_ing_autocomplete(data: list) -> list:
         list: list of html option tags
     """
     data_list = pd.DataFrame(data).ingredient_name.unique()
+    return [html.Option(value=word) for word in data_list]
+
+
+@callback(Output("list_meal_name", "children"), Input("meal_data", "data"))
+def update_meal_autocomplete(data: list) -> list:
+    """Update the autocomplete suggestions.
+
+    Args:
+        data (list): data from store object
+
+    Returns:
+        list: list of html option tags
+    """
+    data_list = pd.DataFrame(data).name.unique()
     return [html.Option(value=word) for word in data_list]
 
 
@@ -408,3 +422,48 @@ def write_inventory_data(
         if data:
             load_data(db_path, data)
     return num_clicks + 1
+
+
+@callback(
+    Output("meal_add_items", "children"),
+    Input("add_comp_btn", "n_clicks"),
+    State("meal_add_items", "children"),
+    prevent_initial_call=True,
+)
+def add_more_inputs(n_clicks: int | None, child_list: list | None) -> list:
+    """Add more ingrdient input fields to the add meal menu.
+
+    Args:
+        n_clicks (int | None): number of add ingredient button clicks
+        child_list (list | None): list of current meal menu children
+
+    Returns:
+        list: updated list of meal menu children
+    """
+    child_list = child_list or []
+    if n_clicks:
+        num = len(child_list)
+        comp_name_inp = dcc.Input(
+            type="text",
+            placeholder="Enter an ingredient name...",
+            className="grid grid-input comp_inp",
+            id=f"comp_inp{num}",
+        )
+        amount_inp = dcc.Input(
+            type="number",
+            placeholder=0,
+            className="grid grid-input amount_inp",
+            id=f"amount_inp{num}",
+        )
+        input_form = dbc.Row(
+            [
+                dbc.Col(
+                    comp_name_inp,
+                    width={"offset": 4, "size": 4},
+                    class_name="grid",
+                ),
+                dbc.Col(amount_inp, width=4, class_name="grid"),
+            ]
+        )
+        child_list.append(input_form)
+    return child_list
