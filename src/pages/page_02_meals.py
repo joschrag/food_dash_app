@@ -35,19 +35,21 @@ meal_name_inp = dcc.Input(
     placeholder="Enter a meal name...",
     className="grid grid-input",
     id="meal_inp",
+    list="list_meal_name",
 )
 comp_name_inp = dcc.Input(
     type="text",
     placeholder="Enter an ingredient name...",
     className="grid grid-input",
     id="comp_inp",
+    list="list_inv_name",
 )
 amount_inp = dcc.Input(
     type="number", placeholder=0, className="grid grid-input", id="amount_inp"
 )
 
 add_comp_btn = html.Button(
-    "Add ingredients", className="grid grid-btn submit-btn"
+    "Add ingredients", className="grid grid-btn submit-btn", id="add_comp_btn"
 )
 
 submit_meal_btn = html.Button(
@@ -64,17 +66,24 @@ add_meal_dbc = dbc.Form(
                 dbc.Col(amount_txt, width=4, class_name="grid"),
             ]
         ),
-        dbc.Row(
+        dbc.Container(
             [
-                dbc.Col(meal_name_inp, width=4, class_name="grid"),
-                dbc.Col(comp_name_inp, width=4, class_name="grid"),
-                dbc.Col(amount_inp, width=4, class_name="grid"),
-            ]
+                dbc.Row(
+                    [
+                        dbc.Col(meal_name_inp, width=4, class_name="grid"),
+                        dbc.Col(comp_name_inp, width=4, class_name="grid"),
+                        dbc.Col(amount_inp, width=4, class_name="grid"),
+                    ]
+                ),
+            ],
+            id="meal_add_items",
+            fluid=True,
         ),
         dbc.Row(
             [
                 dbc.Col(
                     add_comp_btn,
+                    id="add_comp_btn",
                     width={"size": 2, "offset": 8},
                     class_name="grid",
                 ),
