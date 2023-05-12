@@ -63,10 +63,6 @@ inv_tag_submit_btn = html.Button(
 
 inv_input_form = dbc.Form(
     [
-        html.Datalist(
-            id="list_inv_name",
-            children=[],
-        ),
         dbc.Row(
             [
                 dbc.Col(name_txt, width=2),
