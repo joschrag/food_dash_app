@@ -236,6 +236,17 @@ a.active {
     background-color: rgba(var(--tag-orange),var(--tag-alpha)) !important;
 }
 
+/*Tag upload field*/
+
+.chrome-picker > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2), div.flexbox-fix:nth-child(2) > div:nth-child(2)
+{
+  display: none;
+}
+.daq-colorpicker--dark__container
+{
+  border-radius: 10px !important;
+  overflow: hidden !important;
+}
 
 
 /*Meals page*/
