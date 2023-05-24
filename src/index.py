@@ -81,6 +81,14 @@ app.layout = dbc.Container(
         dcc.Store(id="tag_ingredient_data", storage_type="session"),
         dcc.Store(id="meal_ingredient_data", storage_type="session"),
         dcc.Interval(id="10_min", interval=MINUTES10),
+        html.Datalist(
+            id="list_inv_name",
+            children=[],
+        ),
+        html.Datalist(
+            id="list_meal_name",
+            children=[],
+        ),
     ],
     className="dbc",
     fluid=True,
