@@ -7,6 +7,8 @@ Date: 15.04.2023
 """
 import dash
 import dash_bootstrap_components as dbc
+
+# import dash_daq as daq
 import pandas as pd
 from dash import dcc, html
 
@@ -83,7 +85,16 @@ inv_input_form = dbc.Form(
                 dbc.Col(inv_tag_dd, width=2),
                 dbc.Col(inv_tag_input, width=2),
                 dbc.Col(
-                    inv_tag_submit_btn,
+                    [
+                        inv_tag_submit_btn,
+                        # daq.ColorPicker(
+                        #     id="tag-color",
+                        #     label="Tag Color Picker",
+                        #     value={"hex": "#119DFF"},
+                        #     labelPosition="bottom",
+                        #     theme={"dark": "True"},
+                        # ),
+                    ],
                     width=1,
                 ),
                 dbc.Col(html.Div(id="added-tags"), width=2),
