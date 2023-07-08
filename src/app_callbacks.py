@@ -8,11 +8,13 @@ Date: 16.04.2023
 from pathlib import Path
 from typing import Literal, Tuple
 
+import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import Input, Output, State, callback, ctx, dcc, html
 
 from sql.sql_handler import SQLHandler
+from src.custom_html import Tag
 from src.scripts.load_sample_data import load_data
 
 db_path = Path.cwd() / "sql" / "example.db"
@@ -205,6 +207,22 @@ def handle_dd_tags(
     options_list = pd.DataFrame(tag_data).tag_name.unique()
     options = [{"label": item, "value": item} for item in options_list]
     return value, options, custom_tag
+
+
+@callback(
+    Output("tag-preview", "children"),
+    Input("custom-tag-input", "value"),
+    Input("tag-color", "value"),
+)
+def preview_tags(tag_name: str, tag_color_dict: dict) -> list[dbc.Badge]:
+    tag_color = tag_color_dict.get("hex", "").lstrip("#")
+    if tag_name and tag_color:
+        tag_alpha = 0.35
+        rgb = tuple(int(tag_color[i : i + 2], 16) for i in (0, 2, 4))
+        rgba = tuple(col / 255 for col in rgb) + (tag_alpha,)
+        tag = Tag(tag_name, rgb, rgba)
+        return [tag.comp]
+    return []
 
 
 @callback(
