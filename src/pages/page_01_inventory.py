@@ -7,8 +7,7 @@ Date: 15.04.2023
 """
 import dash
 import dash_bootstrap_components as dbc
-
-# import dash_daq as daq
+import dash_daq as daq
 import pandas as pd
 from dash import dcc, html
 
@@ -63,6 +62,29 @@ inv_tag_submit_btn = html.Button(
     "Add tag", id="add-tag-button", className="row-item submit-btn"
 )
 
+tag_input_form = dbc.Form(
+    [
+        dbc.Row(
+            [
+                dbc.Col(inv_tag_input, width=2),
+                dbc.Col(
+                    daq.ColorPicker(
+                        id="tag-color",
+                        value={"hex": "#119DFF"},
+                        theme={"dark": "True"},
+                    ),
+                ),
+                dbc.Col(
+                    inv_tag_submit_btn,
+                    width={"size": 1, "offset": 1},
+                ),
+                dbc.Col(id="tag-preview"),
+            ]
+        )
+    ],
+    className="tag-input",
+)
+
 inv_input_form = dbc.Form(
     [
         dbc.Row(
@@ -83,20 +105,6 @@ inv_input_form = dbc.Form(
             [
                 dbc.Col(name_inp, width=2),
                 dbc.Col(inv_tag_dd, width=2),
-                dbc.Col(inv_tag_input, width=2),
-                dbc.Col(
-                    [
-                        inv_tag_submit_btn,
-                        # daq.ColorPicker(
-                        #     id="tag-color",
-                        #     label="Tag Color Picker",
-                        #     value={"hex": "#119DFF"},
-                        #     labelPosition="bottom",
-                        #     theme={"dark": "True"},
-                        # ),
-                    ],
-                    width=1,
-                ),
                 dbc.Col(html.Div(id="added-tags"), width=2),
                 dbc.Col(amount_inp, width=2),
                 dbc.Col(submit, width=1),
@@ -131,4 +139,9 @@ item_overview = html.Div(
     id="inv_item_overview",
 )
 
-layout = dbc.Container([headline, inv_input_form, item_overview], fluid=True)
+tag_headline = html.H3("Add a custom tag:")
+
+layout = dbc.Container(
+    [headline, tag_headline, tag_input_form, inv_input_form, item_overview],
+    fluid=True,
+)
