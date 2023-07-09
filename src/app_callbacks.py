@@ -2,13 +2,12 @@
 This module contains the logic for dash callback triggering.
 
 Author: Jonas Schrage
-Date: 16.04.2023
+Date: 09.07.2023
 
 """
 from pathlib import Path
 from typing import Literal, Tuple
 
-import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import Input, Output, State, callback, ctx, dcc, html
@@ -147,6 +146,7 @@ def load_ingredient_meals(_: int, __: int) -> list:
             State("multi-dropdown", "value"),
             State("multi-dropdown", "options"),
             State("custom-tag-input", "value"),
+            State("tag-color", "value"),
             State("ingredient_data", "data"),
             State("tag_ingredient_data", "data"),
         )
@@ -173,17 +173,21 @@ def handle_dd_tags(
     custom_tag: str
     item_data: list
     item_tag_data: list
-    value, options, custom_tag, item_data, item_tag_data = states
+    color_dict: dict
+    value, options, custom_tag, color_dict, item_data, item_tag_data = states
     options = options or []
     value = value or []
     if ctx.triggered_id == "add-tag-button" and n_clicks:
         added_tags = []
-        if custom_tag:
+        tag_color = color_dict.get("hex", "").lstrip("#")
+        if custom_tag and tag_color:
             conn = SQLHandler(db_path, "tags")
             options.append({"label": custom_tag, "value": custom_tag})
             value.append(custom_tag)
             added_tags.append(custom_tag)
-            data_df = pd.DataFrame({"tag_name": [custom_tag]})
+            data_df = pd.DataFrame(
+                {"tag_name": [custom_tag], "tag_color": [tag_color]}
+            )
             conn.write_table(data_df, if_exists="append")
         return value, options, ""
     if ctx.triggered_id == "inv_name":
@@ -210,26 +214,54 @@ def handle_dd_tags(
 
 
 @callback(
-    Output("tag-preview", "children"),
+    Output("tag_preview", "children"),
     Input("custom-tag-input", "value"),
     Input("tag-color", "value"),
 )
-def preview_tags(tag_name: str, tag_color_dict: dict) -> list[dbc.Badge]:
+def preview_tags(tag_name: str, tag_color_dict: dict) -> list[html.Span]:
+    """Create a preview of a tag.
+
+    :param tag_name: tag name
+    :type tag_name: str
+    :param tag_color_dict: colors of the tag
+    :type tag_color_dict: dict
+    :return: tag html component in a list
+    :rtype: list[html.Span]
+    """
     tag_color = tag_color_dict.get("hex", "").lstrip("#")
     if tag_name and tag_color:
-        tag_alpha = 0.35
-        rgb = tuple(int(tag_color[i : i + 2], 16) for i in (0, 2, 4))
-        rgba = tuple(col / 255 for col in rgb) + (tag_alpha,)
-        tag = Tag(tag_name, rgb, rgba)
-        return [tag.comp]
+        tag = create_tag_comp(tag_name, tag_color, ["tag-badge-preview"])
+        return [tag]
     return []
+
+
+def create_tag_comp(
+    tag_name: str, tag_color: str, classes: list | None = None
+) -> html.Span:
+    """Create a Tag component from name and color.
+
+    :param tag_name: display text
+    :type tag_name: str
+    :param tag_color: hex color
+    :type tag_color: str
+    :return: tag component
+    :rtype: html.Span
+    """
+    tag_alpha: float = 0.1
+    rgb: tuple[int, ...] = tuple(
+        (int(tag_color[i : i + 2], 16) for i in [0, 2, 4])
+    )
+    rgba = rgb + (tag_alpha,)
+    tag = Tag(tag_name, rgb, rgba, classes)
+    return tag.comp
 
 
 @callback(
     Output("added-tags", "children"),
     Input("multi-dropdown", "value"),
+    State("tag_data", "data"),
 )
-def display_tags(selected_tags: list[str]) -> list[dbc.Badge] | None:
+def display_tags(selected_tags: list[str], tag_data: list) -> list[html.Span]:
     """Display the selected tags as dbc Badges.
 
     Args:
@@ -238,9 +270,13 @@ def display_tags(selected_tags: list[str]) -> list[dbc.Badge] | None:
     Returns:
         A list of dbc Badges, one for each selected tag.
     """
-    if selected_tags:
+    if selected_tags and tag_data:
+        tag_df = pd.DataFrame(tag_data)
         badges = [
-            dbc.Badge(tag, className="tag-badge") for tag in selected_tags
+            create_tag_comp(
+                tag, tag_df.query("tag_name == @tag").tag_color.values[0]
+            )
+            for tag in selected_tags
         ]
         return badges
     return []
@@ -265,10 +301,8 @@ def display_items(input_df: pd.DataFrame) -> html.Table:
     for _, content in iter_df.iterrows():
         uid, item_name, amount = content
         _ = uid
-        tags = input_df.query("id == @uid").loc[:, "tag_name"]
-        badges = html.Td(
-            [dbc.Badge(tag, className="tag-badge") for tag in tags]
-        )
+        tags = input_df.query("id == @uid").loc[:, ["tag_name", "tag_color"]]
+        badges = html.Td([create_tag_comp(*vals) for vals in tags.values])
         item_txt = html.Td(item_name)
         # item_cat = html.Td(cat)
         item_amount = html.Td(amount)
@@ -303,13 +337,13 @@ def display_ingredient_inventory(
     ]
     translate_df = pd.DataFrame(translate)
     tags_df = pd.DataFrame(tags)
-    temp_df = temp_df.merge(
+    joined_df = temp_df.merge(
         translate_df, left_on="id", right_on="ingredient_id"
     )
-    temp_df = temp_df.merge(
+    joined_df = joined_df.merge(
         tags_df.rename(columns={"id": "tag_id"}), on="tag_id"
     )
-    table = display_items(temp_df)
+    table = display_items(joined_df)
     return [table]
 
 
@@ -386,7 +420,10 @@ def write_inventory_data(
         mem_tag_df = pd.DataFrame(tag_data)
         mem_ing_df = pd.DataFrame(ingredient_data)
         mem_tag_ing_df = pd.DataFrame(tag_ingredient_data)
-        selected_tags = [tag.get("props").get("children") for tag in tags]
+        selected_tags = [
+            tag.get("props").get("children").get("props").get("children")
+            for tag in tags
+        ]
         new_tags = [
             tag
             for tag in selected_tags
