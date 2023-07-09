@@ -2,7 +2,7 @@
 This module contains the layout for the inventory page.
 
 Author: Jonas Schrage
-Date: 15.04.2023
+Date: 09.07.2023
 
 """
 import dash
@@ -68,17 +68,20 @@ tag_input_form = dbc.Form(
             [
                 dbc.Col(inv_tag_input, width=2),
                 dbc.Col(
-                    daq.ColorPicker(
+                    daq.ColorPicker(  # pylint: disable=E1102
                         id="tag-color",
                         value={"hex": "#119DFF"},
                         theme={"dark": "True"},
+                        size=255,
                     ),
+                    width={"offset": 1},
                 ),
+                dbc.Col(className="tag-preview", id="tag_preview"),
                 dbc.Col(
                     inv_tag_submit_btn,
                     width={"size": 1, "offset": 1},
+                    className="tag-preview",
                 ),
-                dbc.Col(id="tag-preview"),
             ]
         )
     ],
@@ -90,10 +93,10 @@ inv_input_form = dbc.Form(
         dbc.Row(
             [
                 dbc.Col(name_txt, width=2),
-                dbc.Col(dd_txt, width={"size": 2, "offset": 1}),
+                dbc.Col(dd_txt, width=2),
                 dbc.Col(
                     tag_txt,
-                    width={"size": 2, "offset": 2},
+                    width=2,
                 ),
                 dbc.Col(
                     amount_txt,
