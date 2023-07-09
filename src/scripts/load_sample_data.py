@@ -111,31 +111,32 @@ def load_data(
     engine = sql_handler.engine
 
     for table_name, iter_df, load_mode in data:
-        with engine.connect() as conn, conn.begin():
-            print(table_name, iter_df, sep="\n")
-            # iter_df.to_excel(f"{table_name}.xlsx")
-            ingredients_table = None
-            if table_name == "tags":
+        if not iter_df.empty:
+            with engine.connect() as conn, conn.begin():
+                # iter_df.to_excel(f"{table_name}.xlsx")
+                ingredients_table = None
+                if table_name == "tags":
+                    iter_df.to_sql(
+                        table_name, conn, if_exists=load_mode, index=False
+                    )
+                else:
+                    if table_name != "ingredients":
+                        ingredients_table = sql_handler.get_table("ingredients")
+                    tag_table = sql_handler.get_table("tags")
+                    # print(iter_df)
+                    # Replace tag_name column with tag_id by querying the tags table
+                    if "tag_name" in iter_df.columns:
+                        iter_df = tag_name_to_id(iter_df, tag_table, conn)
+                    if (
+                        "ingredient_name" in iter_df.columns
+                        and table_name != "ingredients"
+                    ):
+                        iter_df = ingredient_name_to_id(
+                            iter_df, ingredients_table, conn
+                        )
                 iter_df.to_sql(
                     table_name, conn, if_exists=load_mode, index=False
                 )
-            else:
-                if table_name != "ingredients":
-                    ingredients_table = sql_handler.get_table("ingredients")
-                tag_table = sql_handler.get_table("tags")
-                # print(iter_df)
-                # Replace tag_name column with tag_id by querying the tags table
-                if "tag_name" in iter_df.columns:
-                    iter_df = tag_name_to_id(iter_df, tag_table, conn)
-                print(iter_df)
-                if (
-                    "ingredient_name" in iter_df.columns
-                    and table_name != "ingredients"
-                ):
-                    iter_df = ingredient_name_to_id(
-                        iter_df, ingredients_table, conn
-                    )
-            iter_df.to_sql(table_name, conn, if_exists=load_mode, index=False)
 
 
 def ingredient_name_to_id(
